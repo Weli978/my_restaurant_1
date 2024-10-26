@@ -18,7 +18,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::middleware(['auth:sanctum'])->group(function () {
+// Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResources([
         'categories' => CategoryController::class,
         'menus' => MenuController::class,
@@ -27,4 +27,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'payments' => PaymentController::class,
         'orderdetails' => OrderdetailsController::class,
     ]);
-});
+
+    Route::get('/getOrderDetails/{id}', [OrderController::class,'getOrderdetails']);
+// });
