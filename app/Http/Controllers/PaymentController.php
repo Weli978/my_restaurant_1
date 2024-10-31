@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Models\Payment;
 use App\Models\User;
+use App\Models\Order;
 use App\Notifications\SendPaymentEmail;
 use App\Http\Requests\StorePaymentRequest;
 use App\Http\Requests\UpdatePaymentRequest;
@@ -16,8 +16,7 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        $payment = Payment::all();
-        return $payment;
+        //
     }
 
     /**
@@ -34,16 +33,19 @@ class PaymentController extends Controller
     public function store(StorePaymentRequest $request)
     {
         $payment = new Payment;
-
-        $payment->payment_type=$request->payment_type;
-        $payment->amount=$request->amount;
-        $payment->user_id=$request->user_id;
-        $payment->payment_status=$request->payment_status;
-        $payment->order_id=$request->order_id;
-
+        $payment->order_id = $request->order_id;
+        $payment->payment_type = $request->payment_type;
+        $payment->amount = $request->amount;
+        $payment->user_id = $request->user_id;
+        $payment->payment_status = $request->payment_status;
         $payment->save();
 
-        //send mail
+        //update order status
+        $order = Order::where('id', $request->order_id)->first();
+        $order->order_status = 'Preparing';
+        $order->save();
+
+        //send mail:
         $user = User::find($request->user_id);
         $user->notify(new SendPaymentEmail($user, $payment));
 
@@ -72,15 +74,12 @@ class PaymentController extends Controller
     public function update(UpdatePaymentRequest $request, Payment $payment)
     {
         $payment = Payment::find($request->id);
-
-        $payment->payment_type=$request->payment_type;
-        $payment->amount=$request->amount;
-        $payment->user_id=$request->user_id;
-        $payment->payment_status=$request->payment_status;
-        $payment->order_id=$request->order_id;
-
+        $payment->order_id = $request->order_id;
+        $payment->payment_type = $request->payment_type;
+        $payment->amount = $request->amount;
+        $payment->user_id = $request->user_id;
+        $payment->payment_status = $request->payment_status;
         $payment->save();
-        return $payment;
     }
 
     /**
